@@ -1,36 +1,55 @@
+/* Basic styles for the MCQ Exam */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
     margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    padding: 0;
+    background-color: #f4f4f4;
 }
 
 .container {
-    background: #fff;
+    max-width: 600px;
+    margin: 20px auto;
     padding: 20px;
+    background: #fff;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 20px;
+    color: #333;
 }
 
 button {
-    margin-top: 20px;
+    display: block;
+    margin: 10px auto;
     padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
     cursor: pointer;
+    font-size: 16px;
 }
 
 button:disabled {
-    background-color: #ccc;
+    background-color: #6c757d;
+}
+
+input[type="text"] {
+    display: block;
+    width: calc(100% - 22px);
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#question-container {
+    margin-bottom: 20px;
+}
+
+#add-question-form {
+    margin-top: 20px;
 }
