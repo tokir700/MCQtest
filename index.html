@@ -5,12 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCQ Exam</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>MCQ Exam</h1>
         <div id="question-container"></div>
         <button id="next-btn">Next</button>
+        <!-- Button for Adding Questions -->
+        <button id="add-question-btn">Add Your Question</button>
+        <div id="add-question-form" style="display:none;">
+            <input type="text" id="question-input" placeholder="Enter your question">
+            <input type="text" id="option1-input" placeholder="Option 1">
+            <input type="text" id="option2-input" placeholder="Option 2">
+            <input type="text" id="option3-input" placeholder="Option 3">
+            <input type="text" id="option4-input" placeholder="Option 4">
+            <input type="text" id="correct-option-input" placeholder="Correct Option Number">
+            <button id="submit-question-btn">Submit Question</button>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
