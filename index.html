@@ -12,6 +12,7 @@
     <div class="container">
         <h1>MCQ Exam Submission</h1>
         <form id="mcq-form">
+            <!-- Form Fields -->
             <div class="form-group">
                 <label for="question">Question:</label>
                 <input type="text" id="question" required>
@@ -38,6 +39,15 @@
             </div>
             <button type="submit">Submit MCQ</button>
         </form>
+
+        <h2>Submitted MCQs</h2>
+        <div id="exam-section">
+            <button id="load-mcqs">Load MCQs</button>
+            <form id="exam-form">
+                <!-- MCQs will be dynamically loaded here -->
+            </form>
+            <button type="submit" id="submit-exam">Submit Exam</button>
+        </div>
     </div>
 
     <script src="app.js"></script>
