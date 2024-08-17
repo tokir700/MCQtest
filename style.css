@@ -114,4 +114,11 @@ button[type="submit"] {
     background-color: #4CAF50;
     color: white;
     border: none;
-    cursor
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
