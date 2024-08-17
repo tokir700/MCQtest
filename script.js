@@ -61,4 +61,14 @@ async function displayMCQs() {
                 <h4>${mcq.question}</h4>
                 <ul>
                     <li>${mcq.options[0]}</li>
-       
+                    <li>${mcq.options[1]}</li>
+                    <li>${mcq.options[2]}</li>
+                    <li>${mcq.options[3]}</li>
+                </ul>
+            </div>
+        `;
+    });
+}
+
+// Initially display MCQs
+displayMCQs();
