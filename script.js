@@ -1,11 +1,6 @@
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAcKS6u6OvqdysbAWNuW-rSZaCgP-qhX4M",
-    authDomain: "mcq1-tokir700.firebaseapp.com",
-    projectId: "mcq1-tokir700",
-    storageBucket: "mcq1-tokir700.appspot.com",
-    messagingSenderId: "1086480852956",
-    appId: "1:1086480852956:web:98849aea5f8ba929f21119"
+    // Your Firebase configuration here
 };
 
 // Initialize Firebase
@@ -32,7 +27,63 @@ function submitMCQ(e) {
     }).then(() => {
         alert('MCQ Submitted Successfully!');
         document.getElementById('mcq-form').reset();
+        loadMCQs(); // Automatically load MCQs after submission
     }).catch(error => {
         console.error('Error adding MCQ: ', error);
     });
 }
+
+// Load MCQs from Firebase
+document.getElementById('load-mcqs').addEventListener('click', loadMCQs);
+
+function loadMCQs() {
+    db.collection('mcqs').get().then(snapshot => {
+        const examForm = document.getElementById('exam-form');
+        examForm.innerHTML = ''; // Clear previous MCQs
+
+        snapshot.forEach(doc => {
+            const mcqData = doc.data();
+            const mcqDiv = document.createElement('div');
+            mcqDiv.classList.add('mcq');
+
+            mcqDiv.innerHTML = `
+                <p>${mcqData.question}</p>
+                <div class="mcq-options">
+                    ${mcqData.options.map((option, index) => `
+                        <label>
+                            <input type="radio" name="${doc.id}" value="${index + 1}" required>
+                            ${option}
+                        </label><br>
+                    `).join('')}
+                </div>
+            `;
+            examForm.appendChild(mcqDiv);
+        });
+    }).catch(error => {
+        console.error('Error loading MCQs: ', error);
+    });
+}
+
+// Handle exam submission (if required)
+document.getElementById('submit-exam').addEventListener('click', function(e) {
+    e.preventDefault();
+    const formElements = document.getElementById('exam-form').elements;
+    let score = 0;
+    let totalQuestions = 0;
+
+    db.collection('mcqs').get().then(snapshot => {
+        snapshot.forEach(doc => {
+            const correctAnswer = doc.data().correct;
+            const selectedAnswer = formElements[doc.id].value;
+
+            if (correctAnswer == selectedAnswer) {
+                score++;
+            }
+            totalQuestions++;
+        });
+
+        alert(`Your score is: ${score} / ${totalQuestions}`);
+    }).catch(error => {
+        console.error('Error submitting exam: ', error);
+    });
+});
