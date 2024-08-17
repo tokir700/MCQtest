@@ -4,43 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCQ Quiz</title>
-    <link rel="stylesheet" href="style.css">
-    <script type="module" src="script.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <header>
         <h1>MCQ Quiz</h1>
+    </header>
 
-        <!-- Quiz Section -->
-        <div id="quizContainer" class="quiz-container">
-            <div id="questionContainer" class="question-container">
-                <h2 id="question">Loading...</h2>
-                <ul id="options" class="options">
-                    <!-- Options will be dynamically generated here -->
-                </ul>
-            </div>
-            <button id="nextButton" class="next-button">Next</button>
-        </div>
+    <section id="formSection">
+        <h2>Submit a New MCQ</h2>
+        <form id="mcqForm">
+            <label for="questionInput">Question:</label>
+            <input type="text" id="questionInput" required>
 
-        <!-- MCQ Submission Form -->
-        <div class="form-container">
-            <h2>Submit Your Own MCQ</h2>
-            <form id="mcqForm">
-                <label for="question">Question:</label>
-                <input type="text" id="questionInput" required><br>
-                <label for="option1">Option 1:</label>
-                <input type="text" id="option1" required><br>
-                <label for="option2">Option 2:</label>
-                <input type="text" id="option2" required><br>
-                <label for="option3">Option 3:</label>
-                <input type="text" id="option3" required><br>
-                <label for="option4">Option 4:</label>
-                <input type="text" id="option4" required><br>
-                <label for="correctOption">Correct Option (1-4):</label>
-                <input type="number" id="correctOption" min="1" max="4" required><br>
-                <button type="submit">Submit MCQ</button>
-            </form>
-        </div>
-    </div>
+            <label for="option1">Option 1:</label>
+            <input type="text" id="option1" required>
+
+            <label for="option2">Option 2:</label>
+            <input type="text" id="option2" required>
+
+            <label for="option3">Option 3:</label>
+            <input type="text" id="option3" required>
+
+            <label for="option4">Option 4:</label>
+            <input type="text" id="option4" required>
+
+            <label for="correctOption">Correct Option (1-4):</label>
+            <input type="number" id="correctOption" min="1" max="4" required>
+
+            <button type="submit">Submit MCQ</button>
+        </form>
+    </section>
+
+    <section id="quizSection">
+        <h2>Quiz</h2>
+        <div id="question"></div>
+        <ul id="options"></ul>
+        <button id="nextButton" style="display:none;">Next Question</button>
+    </section>
+
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
