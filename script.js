@@ -1,25 +1,24 @@
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "firebase/firestore";
+import { getDatabase, ref, push, onValue } from "firebase/database";
 
-// Firebase configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDcNmJRc-wExWMS-I7weIJZs6LSSh1skTY",
-    authDomain: "mcq2-85461.firebaseapp.com",
-    projectId: "mcq2-85461",
-    storageBucket: "mcq2-85461.appspot.com",
-    messagingSenderId: "1071652889012",
-    appId: "1:1071652889012:web:f41d4c54927b02c94912e1",
-    measurementId: "G-MEWBDKGL2X"
+  apiKey: "AIzaSyDcNmJRc-wExWMS-I7weIJZs6LSSh1skTY",
+  authDomain: "mcq2-85461.firebaseapp.com",
+  projectId: "mcq2-85461",
+  storageBucket: "mcq2-85461.appspot.com",
+  messagingSenderId: "1071652889012",
+  appId: "1:1071652889012:web:f41d4c54927b02c94912e1",
+  measurementId: "G-MEWBDKGL2X",
+  databaseURL: "https://mcq2-85461-default-rtdb.asia-southeast1.firebasedatabase.app/", // Realtime Database URL
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const database = getDatabase(app);
 
-let currentQuestionIndex = 0;
-let questions = [];
-
-// Handle form submission
+// Function to submit MCQ to the Realtime Database
 document.getElementById('mcqForm').addEventListener('submit', submitMCQ);
 
 async function submitMCQ(e) {
@@ -32,29 +31,38 @@ async function submitMCQ(e) {
     const option4 = document.getElementById('option4').value;
     const correctOption = parseInt(document.getElementById('correctOption').value);
 
+    const mcqData = {
+        question: question,
+        options: [option1, option2, option3, option4],
+        correctOption: correctOption
+    };
+
     try {
-        await addDoc(collection(db, 'mcqs'), {
-            question: question,
-            options: [option1, option2, option3, option4],
-            correctOption: correctOption
-        });
+        const mcqsRef = ref(database, 'mcqs');
+        await push(mcqsRef, mcqData);
         alert('MCQ submitted!');
         document.getElementById('mcqForm').reset();
         loadQuestions();
     } catch (e) {
-        console.error('Error adding document: ', e);
+        console.error('Error adding MCQ: ', e);
     }
 }
 
-// Load MCQs from Firestore
+// Function to load and display MCQs
+let questions = [];
+let currentQuestionIndex = 0;
+
 async function loadQuestions() {
-    const q = query(collection(db, 'mcqs'), orderBy('question'));
-    const querySnapshot = await getDocs(q);
-    questions = [];
-    querySnapshot.forEach((doc) => {
-        questions.push(doc.data());
+    const mcqsRef = ref(database, 'mcqs');
+
+    onValue(mcqsRef, (snapshot) => {
+        questions = [];
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            questions.push(data);
+        });
+        displayQuestion();
     });
-    displayQuestion();
 }
 
 // Display the current question
