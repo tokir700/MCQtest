@@ -1,119 +1,73 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push, onValue } from "firebase/database";
+const sheetID = '1SOwMSfHonN0oF1h6v8pqN_pZ2FCL29VlKJbfPmWIFxI'; // Use your Sheet ID
+const sheetURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=Sheet1&tqx=out:json`;
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDcNmJRc-wExWMS-I7weIJZs6LSSh1skTY",
-  authDomain: "mcq2-85461.firebaseapp.com",
-  projectId: "mcq2-85461",
-  storageBucket: "mcq2-85461.appspot.com",
-  messagingSenderId: "1071652889012",
-  appId: "1:1071652889012:web:f41d4c54927b02c94912e1",
-  measurementId: "G-MEWBDKGL2X",
-  databaseURL: "https://mcq2-85461-default-rtdb.asia-southeast1.firebasedatabase.app/", // Realtime Database URL
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-// Function to submit MCQ to the Realtime Database
-document.getElementById('mcqForm').addEventListener('submit', submitMCQ);
-
-async function submitMCQ(e) {
-    e.preventDefault();
-
-    const question = document.getElementById('questionInput').value;
-    const option1 = document.getElementById('option1').value;
-    const option2 = document.getElementById('option2').value;
-    const option3 = document.getElementById('option3').value;
-    const option4 = document.getElementById('option4').value;
-    const correctOption = parseInt(document.getElementById('correctOption').value);
-
-    const mcqData = {
-        question: question,
-        options: [option1, option2, option3, option4],
-        correctOption: correctOption
-    };
-
-    try {
-        const mcqsRef = ref(database, 'mcqs');
-        await push(mcqsRef, mcqData);
-        alert('MCQ submitted!');
-        document.getElementById('mcqForm').reset();
-        loadQuestions();
-    } catch (e) {
-        console.error('Error adding MCQ: ', e);
-    }
-}
-
-// Function to load and display MCQs
-let questions = [];
 let currentQuestionIndex = 0;
+let questions = [];
 
-async function loadQuestions() {
-    const mcqsRef = ref(database, 'mcqs');
-
-    onValue(mcqsRef, (snapshot) => {
-        questions = [];
-        snapshot.forEach((childSnapshot) => {
-            const data = childSnapshot.val();
-            questions.push(data);
+// Fetch questions from Google Sheets
+function fetchQuestions() {
+    fetch(sheetURL)
+        .then(response => response.text())
+        .then(data => {
+            const json = JSON.parse(data.replace(/^\S+?\(/, '').replace(/\);$/, ''));
+            questions = json.table.rows.map(row => {
+                const c = row.c;
+                return {
+                    id: c[0].v,
+                    question: c[1].v,
+                    options: {
+                        A: c[2].v,
+                        B: c[3].v,
+                        C: c[4].v,
+                        D: c[5].v
+                    },
+                    answer: c[6].v
+                };
+            });
+            displayQuestion();
         });
-        displayQuestion();
-    });
 }
 
-// Display the current question
+// Display a question
 function displayQuestion() {
-    if (questions.length === 0) return;
-
-    const currentQuestion = questions[currentQuestionIndex];
-    document.getElementById('question').textContent = currentQuestion.question;
-
-    const optionsList = document.getElementById('options');
-    optionsList.innerHTML = '';
-    currentQuestion.options.forEach((option, index) => {
-        const li = document.createElement('li');
-        li.textContent = option;
-        li.classList.add('option');
-        li.addEventListener('click', () => selectOption(index + 1));
-        optionsList.appendChild(li);
+    const question = questions[currentQuestionIndex];
+    document.getElementById('question-container').innerText = question.question;
+    const optionsContainer = document.getElementById('options-container');
+    optionsContainer.innerHTML = '';
+    Object.keys(question.options).forEach(optionKey => {
+        const option = question.options[optionKey];
+        const button = document.createElement('button');
+        button.innerText = `${optionKey}: ${option}`;
+        button.onclick = () => checkAnswer(optionKey);
+        optionsContainer.appendChild(button);
     });
-
-    document.getElementById('nextButton').style.display = 'none';
 }
 
-// Handle option selection
-function selectOption(selectedOption) {
-    const currentQuestion = questions[currentQuestionIndex];
-    const optionsList = document.getElementById('options').children;
-
-    for (let i = 0; i < optionsList.length; i++) {
-        if (i + 1 === currentQuestion.correctOption) {
-            optionsList[i].classList.add('correct');
-        } else {
-            optionsList[i].classList.add('wrong');
-        }
-
-        if (i + 1 === selectedOption) {
-            if (selectedOption === currentQuestion.correctOption) {
-                optionsList[i].classList.add('selected-correct');
-            } else {
-                optionsList[i].classList.add('selected-wrong');
-            }
-        }
+// Check answer
+function checkAnswer(selectedOption) {
+    const correctAnswer = questions[currentQuestionIndex].answer;
+    if (selectedOption === correctAnswer) {
+        alert('Correct!');
+    } else {
+        alert('Wrong answer!');
     }
-
-    document.getElementById('nextButton').style.display = 'block';
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        displayQuestion();
+    } else {
+        alert('Quiz completed!');
+        // Optionally: reset quiz or show results
+    }
 }
 
-// Move to the next question
-document.getElementById('nextButton').addEventListener('click', () => {
-    currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
-    displayQuestion();
-});
+// Start quiz
+fetchQuestions();
 
-// Initial load of questions
-loadQuestions();
+document.getElementById('next-button').onclick = () => {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        displayQuestion();
+    } else {
+        alert('Quiz completed!');
+    }
+};
