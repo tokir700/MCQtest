@@ -5,104 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCQ Question Entry</title>
     <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --text-color: #333;
+            --border-color: #e1e4e8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            padding: 20px;
+        }
+
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
         }
+
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 28px;
         }
+
         form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: grid;
+            gap: 20px;
         }
+
         label {
+            font-weight: 600;
+            margin-bottom: 5px;
             display: block;
-            margin-top: 10px;
-            font-weight: bold;
         }
+
         select, input[type="text"], textarea {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
+            padding: 10px;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
-            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
         }
+
+        select:focus, input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
         textarea {
             resize: vertical;
+            min-height: 100px;
         }
+
         input[type="submit"] {
-            background-color: #3498db;
-            color: #fff;
-            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 12px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 20px;
+            transition: background-color 0.3s ease;
         }
+
         input[type="submit"]:hover {
-            background-color: #2980b9;
+            background-color: #3a7cbd;
         }
+
         .success-message {
-            background-color: #2ecc71;
-            color: #fff;
-            padding: 10px;
+            background-color: #4caf50;
+            color: #ffffff;
+            padding: 15px;
             border-radius: 4px;
             margin-top: 20px;
             text-align: center;
             display: none;
         }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>MCQ Question Entry</h1>
-    <form id="mcq-form">
-        <label for="topic">Topic:</label>
-        <select id="topic" name="topic" required>
-            <option value="">Select a topic</option>
-            <option value="Cardiology">Cardiology</option>
-            <option value="Endocrinology">Endocrinology</option>
-            <option value="Respiratory">Respiratory</option>
-            <option value="Gastroenterology">Gastroenterology</option>
-        </select>
+    <div class="container">
+        <h1>MCQ Question Entry</h1>
+        <form id="mcq-form">
+            <div>
+                <label for="topic">Topic</label>
+                <select id="topic" name="topic" required>
+                    <option value="">Select a topic</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Endocrinology">Endocrinology</option>
+                    <option value="Respiratory">Respiratory</option>
+                    <option value="Gastroenterology">Gastroenterology</option>
+                </select>
+            </div>
 
-        <label for="question">Question:</label>
-        <textarea id="question" name="question" rows="3" required></textarea>
+            <div>
+                <label for="question">Question</label>
+                <textarea id="question" name="question" required></textarea>
+            </div>
 
-        <label for="option1">Option 1:</label>
-        <input type="text" id="option1" name="option1" required>
+            <div>
+                <label for="option1">Option 1</label>
+                <input type="text" id="option1" name="option1" required>
+            </div>
 
-        <label for="option2">Option 2:</label>
-        <input type="text" id="option2" name="option2" required>
+            <div>
+                <label for="option2">Option 2</label>
+                <input type="text" id="option2" name="option2" required>
+            </div>
 
-        <label for="option3">Option 3:</label>
-        <input type="text" id="option3" name="option3" required>
+            <div>
+                <label for="option3">Option 3</label>
+                <input type="text" id="option3" name="option3" required>
+            </div>
 
-        <label for="option4">Option 4:</label>
-        <input type="text" id="option4" name="option4" required>
+            <div>
+                <label for="option4">Option 4</label>
+                <input type="text" id="option4" name="option4" required>
+            </div>
 
-        <label for="option5">Option 5:</label>
-        <input type="text" id="option5" name="option5" required>
+            <div>
+                <label for="option5">Option 5 (Optional)</label>
+                <input type="text" id="option5" name="option5">
+            </div>
 
-        <label for="correctanswer">Correct Answer:</label>
-        <input type="text" id="correctanswer" name="correctanswer" required>
+            <div>
+                <label for="correctAnswer">Correct Answer</label>
+                <input type="text" id="correctAnswer" name="correctAnswer" required>
+            </div>
 
-        <label for="explanation">Explanation:</label>
-        <textarea id="explanation" name="explanation" rows="3" required></textarea>
+            <div>
+                <label for="explanation">Explanation</label>
+                <textarea id="explanation" name="explanation" required></textarea>
+            </div>
 
-        <input type="submit" value="Submit Question">
-    </form>
-    <div id="success-message" class="success-message">Question added successfully!</div>
+            <input type="submit" value="Submit Question">
+        </form>
+        <div id="success-message" class="success-message">Question added successfully!</div>
+    </div>
 
     <script>
         document.getElementById('mcq-form').addEventListener('submit', function(e) {
@@ -111,19 +171,30 @@
             const formData = new FormData(this);
             const data = {};
             formData.forEach((value, key) => {
-                data[key] = value;
+                data[key] = value.trim();
             });
 
-            fetch('https://sheetdb.io/api/v1/druybo1hyes1p', {
+            if (!data.topic || !data.question || !data.option1 || !data.option2 || !data.option3 || !data.option4 || !data.correctAnswer || !data.explanation) {
+                alert('Please fill all required fields.');
+                return;
+            }
+
+            fetch('https://sheetdb.io/api/v1/muiu7s7r2h8wy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    data: data
+                    data: [data]
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Success:', data);
                 document.getElementById('success-message').style.display = 'block';
