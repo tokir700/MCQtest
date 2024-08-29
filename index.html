@@ -9,10 +9,24 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #f0f5ff;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
         }
         .container {
+            flex-grow: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .content {
             max-width: 800px;
             margin: auto;
             background: white;
@@ -100,13 +114,14 @@
             background-color: #27ae60;
         }
         #add-question-button {
-            margin-top: 40px; /* Move the button 1 inch (approximately 40px) below */
+            margin-top: 40px;
         }
-        #add-quiz-form {
+        #add-quiz-form, #login-form, #register-form {
             margin-top: 30px;
             display: none;
         }
-        #add-quiz-form input, #add-quiz-form textarea, #add-quiz-form select, #add-quiz-form button {
+        #add-quiz-form input, #add-quiz-form textarea, #add-quiz-form select, #add-quiz-form button,
+        #login-form input, #login-form button, #register-form input, #register-form button {
             display: block;
             width: 100%;
             margin: 15px 0;
@@ -115,14 +130,14 @@
             border: 1px solid #ddd;
             font-size: 16px;
         }
-        #add-quiz-form button {
+        #add-quiz-form button, #login-form button, #register-form button {
             background-color: #e74c3c;
             color: white;
             border: none;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        #add-quiz-form button:hover {
+        #add-quiz-form button:hover, #login-form button:hover, #register-form button:hover {
             background-color: #c0392b;
         }
         #explanation-box {
@@ -137,51 +152,113 @@
             margin-top: 0;
             color: #2c3e50;
         }
+        .sidebar-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .sidebar-button:hover {
+            background-color: #2980b9;
+        }
+        #progress-bar {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #progress {
+            width: 0%;
+            height: 20px;
+            background-color: #4caf50;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>MCQ Quiz For MRCP</h1>
-        <div id="topic-selector">
-            <button class="topic-button" data-topic="Cardiology">Cardiology</button>
-            <button class="topic-button" data-topic="Endocrinology">Endocrinology</button>
-            <button class="topic-button" data-topic="Respiratory">Respiratory</button>
-            <button class="topic-button" data-topic="Gastroenterology">Gastroenterology</button>
+    <div class="sidebar">
+        <h2>MCQ Quiz</h2>
+        <button id="login-button" class="sidebar-button">Login</button>
+        <button id="register-button" class="sidebar-button">Register</button>
+        <div id="user-info" style="display: none;">
+            <p>Welcome, <span id="username"></span>!</p>
+            <button id="logout-button" class="sidebar-button">Logout</button>
         </div>
-        <div id="question-container"></div>
-        <div id="explanation-box">
-            <h3>Explanation:</h3>
-            <p id="explanation-text"></p>
+        <div id="progress-bar">
+            <div id="progress"></div>
         </div>
-        <button id="show-answer" style="display: none;">Show Answer</button>
-        <button id="next-question" style="display: none;">Next Question</button>
-        <button id="add-question-button">Add Question</button>
+    </div>
 
-        <form id="add-quiz-form">
-            <h2>Add New Question</h2>
-            <select id="topic" required>
-                <option value="">Select Topic</option>
-                <option value="Cardiology">Cardiology</option>
-                <option value="Endocrinology">Endocrinology</option>
-                <option value="Respiratory">Respiratory</option>
-                <option value="Gastroenterology">Gastroenterology</option>
-            </select>
-            <input type="text" id="question" placeholder="Question" required>
-            <input type="text" id="option1" placeholder="Option 1" required>
-            <input type="text" id="option2" placeholder="Option 2" required>
-            <input type="text" id="option3" placeholder="Option 3" required>
-            <input type="text" id="option4" placeholder="Option 4" required>
-            <input type="number" id="correct-answer" placeholder="Correct Answer (1-4)" min="1" max="4" required>
-            <textarea id="explanation" placeholder="Explanation" required></textarea>
-            <button type="submit">Add Question</button>
-        </form>
+    <div class="container">
+        <div class="content">
+            <h1>MCQ Quiz For MRCP</h1>
+            <div id="topic-selector">
+                <button class="topic-button" data-topic="Cardiology">Cardiology</button>
+                <button class="topic-button" data-topic="Endocrinology">Endocrinology</button>
+                <button class="topic-button" data-topic="Respiratory">Respiratory</button>
+                <button class="topic-button" data-topic="Gastroenterology">Gastroenterology</button>
+            </div>
+            <div id="question-container"></div>
+            <div id="explanation-box">
+                <h3>Explanation:</h3>
+                <p id="explanation-text"></p>
+            </div>
+            <button id="show-answer" style="display: none;">Show Answer</button>
+            <button id="next-question" style="display: none;">Next Question</button>
+            <button id="add-question-button">Add Question</button>
+
+            <form id="add-quiz-form">
+                <h2>Add New Question</h2>
+                <select id="topic" required>
+                    <option value="">Select Topic</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Endocrinology">Endocrinology</option>
+                    <option value="Respiratory">Respiratory</option>
+                    <option value="Gastroenterology">Gastroenterology</option>
+                </select>
+                <input type="text" id="question" placeholder="Question" required>
+                <input type="text" id="option1" placeholder="Option 1" required>
+                <input type="text" id="option2" placeholder="Option 2" required>
+                <input type="text" id="option3" placeholder="Option 3" required>
+                <input type="text" id="option4" placeholder="Option 4" required>
+                <input type="number" id="correct-answer" placeholder="Correct Answer (1-4)" min="1" max="4" required>
+                <textarea id="explanation" placeholder="Explanation" required></textarea>
+                <button type="submit">Add Question</button>
+            </form>
+
+            <form id="login-form">
+                <h2>Login</h2>
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+
+            <form id="register-form">
+                <h2>Register</h2>
+                <input type="text" id="register-username" placeholder="Username" required>
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <button type="submit">Register</button>
+            </form>
+        </div>
     </div>
 
     <script>
         const API_URL = 'https://sheetdb.io/api/v1/muiu7s7r2h8wy';
+        const USER_API_URL = 'https://sheetdb.io/api/v1/druybo1hyes1p'; // Replace with your user sheet ID
         let quizQuestions = [];
         let currentQuestionIndex = 0;
         let currentTopic = null;
+        let currentUser = null;
+        let userProgress = {};
 
         function loadQuestionsFromDatabase() {
             fetch(API_URL)
@@ -243,6 +320,7 @@
             document.getElementById("show-answer").style.display = "block";
             document.getElementById("next-question").style.display = "none";
             document.getElementById("explanation-box").style.display = "none";
+            updateProgressBar();
         }
 
         function handleOptionClick(event) {
@@ -262,6 +340,10 @@
             document.getElementById("next-question").style.display = "block";
             document.getElementById("explanation-box").style.display = "block";
             document.getElementById("explanation-text").textContent = currentQuestion.explanation;
+
+            if (currentUser) {
+                updateUserProgress(selectedIndex === currentQuestion.correctAnswer);
+            }
         }
 
         document.getElementById("show-answer").addEventListener("click", () => {
@@ -332,6 +414,144 @@
                 filterQuestionsByTopic(this.dataset.topic);
             });
         });
+
+        document.getElementById("login-button").addEventListener("click", () => {
+            document.getElementById("login-form").style.display = "block";
+            document.getElementById("register-form").style.display = "none";
+        });
+
+        document.getElementById("register-button").addEventListener("click", () => {
+            document.getElementById("register-form").style.display = "block";
+            document.getElementById("login-form").style.display = "none";
+        });
+
+        document.getElementById("login-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+            loginUser(email, password);
+        });
+
+        document.getElementById("register-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const username = document.getElementById("register-username").value;
+            const email = document.getElementById("register-email").value;
+            const password = document.getElementById("register-password").value;
+            registerUser(username, email, password);
+        });
+
+        document.getElementById("logout-button").addEventListener("click", logoutUser);
+
+        function loginUser(email, password) {
+            fetch(`${USER_API_URL}/search?email=${email}&password=${password}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    currentUser = data[0];
+                    userProgress = JSON.parse(currentUser.progress || '{}');
+                    document.getElementById("username").textContent = currentUser.username;
+                    document.getElementById("user-info").style.display = "block";
+                    document.getElementById("login-button").style.display = "none";
+                    document.getElementById("register-button").style.display = "none";
+                    document.getElementById("login-form").style.display = "none";
+                    updateProgressBar();
+                } else {
+                    alert("Invalid email or password.");
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("An error occurred while logging in.");
+            });
+        }
+
+        function registerUser(username, email, password) {
+            fetch(USER_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: [{
+                        username: username,
+                        email: email,
+                        password: password,
+                        progress: '{}'
+                    }]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Registration successful! Please log in.");
+                document.getElementById("register-form").reset();
+                document.getElementById("register-form").style.display = "none";
+                document.getElementById("login-form").style.display = "block";
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("An error occurred while registering.");
+            });
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            userProgress = {};
+            document.getElementById("user-info").style.display = "none";
+            document.getElementById("login-button").style.display = "block";
+            document.getElementById("register-button").style.display = "block";
+            updateProgressBar();
+        }
+
+        function updateUserProgress(isCorrect) {
+            if (!currentUser) return;
+
+            if (!userProgress[currentTopic]) {
+                userProgress[currentTopic] = {
+                    totalQuestions: quizQuestions.length,
+                    correctAnswers: 0
+                };
+            }
+
+            if (isCorrect) {
+                userProgress[currentTopic].correctAnswers++;
+            }
+
+            // Update progress in the database
+            fetch(`${USER_API_URL}/email/${currentUser.email}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: {
+                        progress: JSON.stringify(userProgress)
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Progress updated successfully");
+                updateProgressBar();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function updateProgressBar() {
+            if (!currentUser || !currentTopic) {
+                document.getElementById("progress").style.width = "0%";
+                return;
+            }
+
+            const topicProgress = userProgress[currentTopic];
+            if (topicProgress) {
+                const progressPercentage = (topicProgress.correctAnswers / topicProgress.totalQuestions) * 100;
+                document.getElementById("progress").style.width = `${progressPercentage}%`;
+            } else {
+                document.getElementById("progress").style.width = "0%";
+            }
+        }
 
         loadQuestionsFromDatabase();
     </script>
