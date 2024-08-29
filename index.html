@@ -10,72 +10,105 @@
             line-height: 1.6;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #f0f5ff;
         }
         .container {
             max-width: 800px;
             margin: auto;
             background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #2c3e50;
+            margin-bottom: 30px;
         }
         #question-container {
             margin-bottom: 20px;
+            background-color: #f7f9fc;
+            padding: 20px;
+            border-radius: 8px;
         }
         .option {
             display: block;
+            width: 100%;
             margin: 10px 0;
-            padding: 10px;
+            padding: 15px;
             background-color: #f0f0f0;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
+            font-size: 16px;
         }
         .option:hover {
             background-color: #e0e0e0;
+            transform: translateY(-2px);
         }
         .option.correct {
-            background-color: #c8e6c9;
+            background-color: #a5d6a7;
         }
         .option.incorrect {
-            background-color: #ffcdd2;
+            background-color: #ef9a9a;
         }
-        #show-answer, #next-question {
+        #show-answer, #next-question, #add-question-button {
             display: block;
             width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            background-color: #4CAF50;
+            padding: 15px;
+            margin-top: 15px;
+            background-color: #3498db;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #show-answer:hover, #next-question:hover, #add-question-button:hover {
+            background-color: #2980b9;
         }
         #next-question {
-            background-color: #2196F3;
+            background-color: #2ecc71;
+        }
+        #next-question:hover {
+            background-color: #27ae60;
         }
         #add-quiz-form {
-            margin-top: 20px;
+            margin-top: 30px;
+            display: none;
         }
-        #add-quiz-form input, #add-quiz-form button {
+        #add-quiz-form input, #add-quiz-form textarea, #add-quiz-form button {
             display: block;
             width: 100%;
-            margin: 10px 0;
-            padding: 10px;
+            margin: 15px 0;
+            padding: 15px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            font-size: 16px;
         }
         #add-quiz-form button {
-            background-color: #4CAF50;
+            background-color: #e74c3c;
             color: white;
             border: none;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #add-quiz-form button:hover {
+            background-color: #c0392b;
+        }
+        #explanation-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            border-left: 5px solid #4caf50;
+            display: none;
+        }
+        #explanation-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
         }
     </style>
 </head>
@@ -83,8 +116,13 @@
     <div class="container">
         <h1>MCQ Quiz For MRCP</h1>
         <div id="question-container"></div>
+        <div id="explanation-box">
+            <h3>Explanation:</h3>
+            <p id="explanation-text"></p>
+        </div>
         <button id="show-answer" style="display: none;">Show Answer</button>
         <button id="next-question" style="display: none;">Next Question</button>
+        <button id="add-question-button">Add Question</button>
 
         <form id="add-quiz-form">
             <h2>Add New Question</h2>
@@ -94,6 +132,7 @@
             <input type="text" id="option3" placeholder="Option 3" required>
             <input type="text" id="option4" placeholder="Option 4" required>
             <input type="number" id="correct-answer" placeholder="Correct Answer (1-4)" min="1" max="4" required>
+            <textarea id="explanation" placeholder="Explanation" required></textarea>
             <button type="submit">Add Question</button>
         </form>
     </div>
@@ -107,12 +146,13 @@
             fetch(API_URL)
             .then(response => response.json())
             .then(data => {
-                console.log("API Response:", data); // Log the API response
+                console.log("API Response:", data);
                 if (Array.isArray(data) && data.length > 0) {
                     quizQuestions = data.map(q => ({
                         question: q.question,
                         options: [q.option1, q.option2, q.option3, q.option4],
-                        correctAnswer: parseInt(q.correctAnswer) - 1
+                        correctAnswer: parseInt(q.correctAnswer) - 1,
+                        explanation: q.explanation
                     }));
                     displayCurrentQuestion();
                 } else {
@@ -146,6 +186,7 @@
 
             document.getElementById("show-answer").style.display = "block";
             document.getElementById("next-question").style.display = "none";
+            document.getElementById("explanation-box").style.display = "none";
         }
 
         function handleOptionClick(event) {
@@ -163,6 +204,8 @@
 
             document.getElementById("show-answer").style.display = "none";
             document.getElementById("next-question").style.display = "block";
+            document.getElementById("explanation-box").style.display = "block";
+            document.getElementById("explanation-text").textContent = currentQuestion.explanation;
         }
 
         document.getElementById("show-answer").addEventListener("click", () => {
@@ -175,11 +218,18 @@
             });
             document.getElementById("show-answer").style.display = "none";
             document.getElementById("next-question").style.display = "block";
+            document.getElementById("explanation-box").style.display = "block";
+            document.getElementById("explanation-text").textContent = currentQuestion.explanation;
         });
 
         document.getElementById("next-question").addEventListener("click", () => {
             currentQuestionIndex = (currentQuestionIndex + 1) % quizQuestions.length;
             displayCurrentQuestion();
+        });
+
+        document.getElementById("add-question-button").addEventListener("click", function() {
+            document.getElementById("add-quiz-form").style.display = "block";
+            this.style.display = "none";
         });
 
         document.getElementById("add-quiz-form").addEventListener("submit", function(e) {
@@ -190,7 +240,8 @@
                 option2: document.getElementById("option2").value,
                 option3: document.getElementById("option3").value,
                 option4: document.getElementById("option4").value,
-                correctAnswer: document.getElementById("correct-answer").value
+                correctAnswer: document.getElementById("correct-answer").value,
+                explanation: document.getElementById("explanation").value
             };
             addQuestionToDatabase(newQuestion);
         });
@@ -207,6 +258,8 @@
             .then(data => {
                 alert("Question added successfully!");
                 document.getElementById("add-quiz-form").reset();
+                document.getElementById("add-quiz-form").style.display = "none";
+                document.getElementById("add-question-button").style.display = "block";
                 loadQuestionsFromDatabase();
             })
             .catch((error) => {
