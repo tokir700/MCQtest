@@ -83,8 +83,8 @@
     <div class="container">
         <h1>MCQ Quiz For MRCP</h1>
         <div id="question-container"></div>
-        <button id="show-answer">Show Answer</button>
-        <button id="next-question">Next Question</button>
+        <button id="show-answer" style="display: none;">Show Answer</button>
+        <button id="next-question" style="display: none;">Next Question</button>
 
         <form id="add-quiz-form">
             <h2>Add New Question</h2>
@@ -99,7 +99,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://sheetdb.io/api/v1/your_api_endpoint';
+        const API_URL = 'https://sheetdb.io/api/v1/muiu7s7r2h8wy';
         let quizQuestions = [];
         let currentQuestionIndex = 0;
 
@@ -107,21 +107,30 @@
             fetch(API_URL)
             .then(response => response.json())
             .then(data => {
-                quizQuestions = data.map(q => ({
-                    question: q.question,
-                    options: [q.option1, q.option2, q.option3, q.option4],
-                    correctAnswer: parseInt(q.correctAnswer) - 1
-                }));
-                displayCurrentQuestion();
+                console.log("API Response:", data); // Log the API response
+                if (Array.isArray(data) && data.length > 0) {
+                    quizQuestions = data.map(q => ({
+                        question: q.question,
+                        options: [q.option1, q.option2, q.option3, q.option4],
+                        correctAnswer: parseInt(q.correctAnswer) - 1
+                    }));
+                    displayCurrentQuestion();
+                } else {
+                    document.getElementById("question-container").innerHTML = "<p>No questions available. Please add some questions using the form below.</p>";
+                }
             })
             .catch((error) => {
                 console.error('Error:', error);
-                alert("An error occurred while loading questions.");
+                document.getElementById("question-container").innerHTML = "<p>An error occurred while loading questions. Please try again later.</p>";
             });
         }
 
         function displayCurrentQuestion() {
             const questionContainer = document.getElementById("question-container");
+            if (quizQuestions.length === 0) {
+                questionContainer.innerHTML = "<p>No questions available. Please add some questions using the form below.</p>";
+                return;
+            }
             const currentQuestion = quizQuestions[currentQuestionIndex];
             
             questionContainer.innerHTML = `
