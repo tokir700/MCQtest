@@ -27,7 +27,8 @@
         }
         #topic-selector {
             display: flex;
-            justify-content: space-around;
+            flex-direction: column;
+            align-items: flex-start;
             margin-bottom: 20px;
         }
         .topic-button {
@@ -38,6 +39,9 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: left;
         }
         .topic-button:hover {
             background-color: #2980b9;
@@ -94,6 +98,9 @@
         }
         #next-question:hover {
             background-color: #27ae60;
+        }
+        #add-question-button {
+            margin-top: 40px; /* Move the button 1 inch (approximately 40px) below */
         }
         #add-quiz-form {
             margin-top: 30px;
@@ -189,11 +196,7 @@
                         correctAnswer: parseInt(q.correctAnswer) - 1,
                         explanation: q.explanation
                     }));
-                    if (currentTopic) {
-                        filterQuestionsByTopic(currentTopic);
-                    } else {
-                        document.getElementById("question-container").innerHTML = "<p>Please select a topic to start the quiz.</p>";
-                    }
+                    document.getElementById("question-container").innerHTML = "<p>Please select a topic to start the quiz.</p>";
                 } else {
                     document.getElementById("question-container").innerHTML = "<p>No questions available. Please add some questions using the form below.</p>";
                 }
