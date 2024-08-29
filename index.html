@@ -25,6 +25,26 @@
             color: #2c3e50;
             margin-bottom: 30px;
         }
+        #topic-selector {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .topic-button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .topic-button:hover {
+            background-color: #2980b9;
+        }
+        .topic-button.active {
+            background-color: #2ecc71;
+        }
         #question-container {
             margin-bottom: 20px;
             background-color: #f7f9fc;
@@ -79,7 +99,7 @@
             margin-top: 30px;
             display: none;
         }
-        #add-quiz-form input, #add-quiz-form textarea, #add-quiz-form button {
+        #add-quiz-form input, #add-quiz-form textarea, #add-quiz-form select, #add-quiz-form button {
             display: block;
             width: 100%;
             margin: 15px 0;
@@ -115,6 +135,12 @@
 <body>
     <div class="container">
         <h1>MCQ Quiz For MRCP</h1>
+        <div id="topic-selector">
+            <button class="topic-button" data-topic="Cardiology">Cardiology</button>
+            <button class="topic-button" data-topic="Endocrinology">Endocrinology</button>
+            <button class="topic-button" data-topic="Respiratory">Respiratory</button>
+            <button class="topic-button" data-topic="Gastroenterology">Gastroenterology</button>
+        </div>
         <div id="question-container"></div>
         <div id="explanation-box">
             <h3>Explanation:</h3>
@@ -126,6 +152,13 @@
 
         <form id="add-quiz-form">
             <h2>Add New Question</h2>
+            <select id="topic" required>
+                <option value="">Select Topic</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Endocrinology">Endocrinology</option>
+                <option value="Respiratory">Respiratory</option>
+                <option value="Gastroenterology">Gastroenterology</option>
+            </select>
             <input type="text" id="question" placeholder="Question" required>
             <input type="text" id="option1" placeholder="Option 1" required>
             <input type="text" id="option2" placeholder="Option 2" required>
@@ -141,6 +174,7 @@
         const API_URL = 'https://sheetdb.io/api/v1/muiu7s7r2h8wy';
         let quizQuestions = [];
         let currentQuestionIndex = 0;
+        let currentTopic = null;
 
         function loadQuestionsFromDatabase() {
             fetch(API_URL)
@@ -149,12 +183,17 @@
                 console.log("API Response:", data);
                 if (Array.isArray(data) && data.length > 0) {
                     quizQuestions = data.map(q => ({
+                        topic: q.topic,
                         question: q.question,
                         options: [q.option1, q.option2, q.option3, q.option4],
                         correctAnswer: parseInt(q.correctAnswer) - 1,
                         explanation: q.explanation
                     }));
-                    displayCurrentQuestion();
+                    if (currentTopic) {
+                        filterQuestionsByTopic(currentTopic);
+                    } else {
+                        document.getElementById("question-container").innerHTML = "<p>Please select a topic to start the quiz.</p>";
+                    }
                 } else {
                     document.getElementById("question-container").innerHTML = "<p>No questions available. Please add some questions using the form below.</p>";
                 }
@@ -163,6 +202,20 @@
                 console.error('Error:', error);
                 document.getElementById("question-container").innerHTML = "<p>An error occurred while loading questions. Please try again later.</p>";
             });
+        }
+
+        function filterQuestionsByTopic(topic) {
+            currentTopic = topic;
+            const filteredQuestions = quizQuestions.filter(q => q.topic === topic);
+            if (filteredQuestions.length > 0) {
+                quizQuestions = filteredQuestions;
+                currentQuestionIndex = 0;
+                displayCurrentQuestion();
+            } else {
+                document.getElementById("question-container").innerHTML = `<p>No questions available for ${topic}. Please add some questions using the form below.</p>`;
+                document.getElementById("show-answer").style.display = "none";
+                document.getElementById("next-question").style.display = "none";
+            }
         }
 
         function displayCurrentQuestion() {
@@ -235,6 +288,7 @@
         document.getElementById("add-quiz-form").addEventListener("submit", function(e) {
             e.preventDefault();
             const newQuestion = {
+                topic: document.getElementById("topic").value,
                 question: document.getElementById("question").value,
                 option1: document.getElementById("option1").value,
                 option2: document.getElementById("option2").value,
@@ -267,6 +321,14 @@
                 alert("An error occurred while adding the question.");
             });
         }
+
+        document.querySelectorAll('.topic-button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.topic-button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                filterQuestionsByTopic(this.dataset.topic);
+            });
+        });
 
         loadQuestionsFromDatabase();
     </script>
