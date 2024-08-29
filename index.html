@@ -3,18 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Video Downloader</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>QuizMaster - MCQ Quiz Platform</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .quiz-container, .add-quiz-container {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .options {
+            margin-bottom: 20px;
+        }
+        .option {
+            display: block;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+            color: #333;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            background-color: #fff;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>YouTube Video Downloader</h1>
-        <form id="download-form">
-            <input type="text" id="video-url" placeholder="Enter YouTube video URL" required>
-            <button type="submit">Download</button>
-        </form>
-        <div id="result"></div>
+    <h1>QuizMaster - MCQ Quiz Platform</h1>
+
+    <div class="tab">
+        <button class="tablinks active" onclick="openTab(event, 'TakeQuiz')">Take Quiz</button>
+        <button class="tablinks" onclick="openTab(event, 'AddQuiz')">Add Quiz</button>
     </div>
-    <script src="script.js"></script>
+
+    <div id="TakeQuiz" class="tabcontent" style="display:block;">
+        <div class="quiz-container">
+            <h2>Current Quiz</h2>
+            <div id="quiz"></div>
+            <button onclick="nextQuestion()">Next Question</button>
+            <button onclick="submitAnswer()">Submit Answer</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <div id="AddQuiz" class="tabcontent">
+        <div class="add-quiz-container">
+            <h2>Add a New Question</h2>
+            <form id="add-quiz-form">
+                <textarea id="question" placeholder="Question" required></textarea>
+                <input type="text" id="option1" placeholder="Option 1" required>
+                <input type="text" id="option2" placeholder="Option 2" required>
+                <input type="text" id="option3" placeholder="Option 3" required>
+                <input type="text" id="option4" placeholder="Option 4" required>
+                <input type="number" id="correct-answer" placeholder="Correct Answer (1-4)" min="1" max="4" required>
+                <button type="submit">Add Question</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://sheetdb.io/api/v1/muiu7s7r2h8wy';
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+
+        function displayCurrentQuestion() {
+            const quizContainer = document.getElementById("quiz");
+            if (currentQuestionIndex < quizQuestions.length) {
+                const q = quizQuestions[currentQuestionIndex];
+                quizContainer.innerHTML = `
+                    <p class="question">${currentQuestionIndex + 1}. ${q.question}</p>
+                    <div class="options">
+                        ${q.options.map((option, i) => `
+                            <label class="option">
+                                <input type="radio" name="q${currentQuestionIndex}" value="${i}">
+                                ${option}
+                            </label>
+                        `).join("")}
+                    </div>
+                `;
+            } else {
+                quizContainer.innerHTML = "<p>No more questions available.</p>";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayCurrentQuestion();
+            } else {
+                alert("You've reached the end of the quiz.");
+            }
+        }
+
+        function submitAnswer() {
+            const selectedOption = document.querySelector(`input[name="q${currentQuestionIndex}"]:checked`);
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = parseInt(selectedOption.value);
+                nextQuestion();
+            } else {
+                alert("Please select an answer before submitting.");
+            }
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            quizQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.correctAnswer) {
+                    score++;
+                }
+            });
+            document.getElementById("result").textContent = `You scored ${score} out of ${quizQuestions.length}`;
+        }
+
+        document.getElementById("add-quiz-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const newQuestion = {
+                question: document.getElementById("question").value,
+                option1: document.getElementById("option1").value,
+                option2: document.getElementById("option2").value,
+                option3: document.getElementById("option3").value,
+                option4: document.getElementById("option4").value,
+                correctAnswer: document.getElementById("correct-answer").value
+            };
+            addQuestionToDatabase(newQuestion);
+        });
+
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        function addQuestionToDatabase(question) {
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(question)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Question added successfully!");
+                document.getElementById("add-quiz-form").reset();
+                loadQuestionsFromDatabase();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("An error occurred while adding the question.");
+            });
+        }
+
+        function loadQuestionsFromDatabase() {
+            fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                quizQuestions = data.map(q => ({
+                    question: q.question,
+                    options: [q.option1, q.option2, q.option3, q.option4],
+                    correctAnswer: parseInt(q.correctAnswer) - 1
+                }));
+                currentQuestionIndex = 0;
+                userAnswers = [];
+                displayCurrentQuestion();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("An error occurred while loading questions.");
+            });
+        }
+
+        // Load questions when the page loads
+        loadQuestionsFromDatabase();
+    </script>
 </body>
-</html>
+    </html>
