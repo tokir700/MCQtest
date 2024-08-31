@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,11 +30,16 @@
             color: #2c3e50;
             margin-bottom: 20px;
         }
+        #topic-selection {
+            margin-bottom: 20px;
+            text-align: center;
+        }
         #question-container {
             margin-bottom: 20px;
             background-color: #f7f9fc;
             padding: 15px;
             border-radius: 8px;
+            display: none;
         }
         #question-container h2 {
             font-size: 13px;
@@ -55,7 +61,7 @@
             background-color: #e0e0e0;
             transform: translateY(-2px);
         }
-        #next-question, #finish-quiz, #home-page {
+        #next-question, #finish-quiz, #home-page, #start-quiz {
             display: inline-block;
             width: 48%;
             padding: 10px;
@@ -68,7 +74,7 @@
             font-size: 14px;
             transition: background-color 0.3s ease;
         }
-        #next-question:hover, #finish-quiz:hover, #home-page:hover {
+        #next-question:hover, #finish-quiz:hover, #home-page:hover, #start-quiz:hover {
             background-color: #2980b9;
         }
         #results {
@@ -106,6 +112,13 @@
 <div class="container">
     <div class="content">
         <h1>Quiz Exam</h1>
+        <div id="topic-selection">
+            <label for="topics">Select a topic:</label>
+            <select id="topics">
+                <option value="">Select a topic...</option>
+            </select>
+            <button id="start-quiz">Start Quiz</button>
+        </div>
         <div id="question-container"></div>
         <button id="next-question" style="display: none;">Next Question</button>
         <button id="finish-quiz" style="display: none;">Finish Quiz</button>
@@ -121,6 +134,7 @@
 <script>
     const API_URL = 'https://sheetdb.io/api/v1/muiu7s7r2h8wy';
     let questions = [];
+    let filteredQuestions = [];
     let currentQuestionIndex = 0;
     let score = 0;
     let quizResponses = [];
@@ -130,23 +144,49 @@
             const response = await fetch(API_URL);
             if (!response.ok) throw new Error('Network response was not ok');
             questions = await response.json();
-            questions = questions.filter(q => q.question && q.option1 && q.option2 && q.option3 && q.option4 && q.option5 && q.correctAnswer);
+            questions = questions.filter(q => q.question && q.option1 && q.option2 && q.option3 && q.option4 && q.option5 && q.correctAnswer && q.topic);
+            populateTopics();
         } catch (error) {
             console.error('Error fetching questions:', error);
             alert('Failed to load questions. Please check your connection and try again.');
         }
     }
 
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+    function populateTopics() {
+        const topics = [...new Set(questions.map(q => q.topic))];
+        const topicsDropdown = document.getElementById('topics');
+        topics.forEach(topic => {
+            const option = document.createElement('option');
+            option.value = topic;
+            option.textContent = topic;
+            topicsDropdown.appendChild(option);
+        });
+    }
+
+    function startQuiz() {
+        const selectedTopic = document.getElementById('topics').value;
+        if (!selectedTopic) {
+            alert('Please select a topic to start the quiz!');
+            return;
         }
+
+        filteredQuestions = questions.filter(q => q.topic === selectedTopic);
+        if (filteredQuestions.length === 0) {
+            alert('No questions available for the selected topic.');
+            return;
+        }
+
+        currentQuestionIndex = 0;
+        score = 0;
+        quizResponses = [];
+        document.getElementById('question-container').style.display = 'block';
+        document.getElementById('topic-selection').style.display = 'none';
+        displayQuestion();
     }
 
     function displayQuestion() {
         const questionContainer = document.getElementById('question-container');
-        const currentQuestion = questions[currentQuestionIndex];
+        const currentQuestion = filteredQuestions[currentQuestionIndex];
 
         if (!currentQuestion) {
             questionContainer.innerHTML = '<p>No more questions available.</p>';
@@ -162,7 +202,6 @@
             currentQuestion.option4,
             currentQuestion.option5
         ];
-        shuffleArray(options);
 
         questionContainer.innerHTML = `
             <h2>Question ${currentQuestionIndex + 1}: ${currentQuestion.question}</h2>
@@ -172,7 +211,7 @@
         `;
 
         document.getElementById('next-question').style.display = 'none';
-        document.getElementById('finish-quiz').style.display = currentQuestionIndex >= questions.length - 1 ? 'block' : 'none';
+        document.getElementById('finish-quiz').style.display = currentQuestionIndex >= filteredQuestions.length - 1 ? 'block' : 'none';
 
         const optionButtons = document.querySelectorAll('.option');
         optionButtons.forEach(button => {
@@ -182,7 +221,7 @@
 
     function handleOptionClick(event) {
         const selectedOption = event.target;
-        const currentQuestion = questions[currentQuestionIndex];
+        const currentQuestion = filteredQuestions[currentQuestionIndex];
         const correctAnswerText = currentQuestion[`option${currentQuestion.correctAnswer}`];
 
         if (selectedOption.textContent === correctAnswerText) {
@@ -195,7 +234,7 @@
             correct: correctAnswerText
         });
 
-        document.getElementById('next-question').style.display = currentQuestionIndex < questions.length - 1 ? 'block' : 'none';
+        document.getElementById('next-question').style.display = currentQuestionIndex < filteredQuestions.length - 1 ? 'block' : 'none';
     }
 
     document.getElementById('next-question').addEventListener('click', () => {
@@ -207,6 +246,8 @@
         displayResults();
     });
 
+    document.getElementById('start-quiz').addEventListener('click', startQuiz);
+
     function displayResults() {
         const resultsContainer = document.getElementById('results');
         const resultList = document.getElementById('result-list');
@@ -214,7 +255,7 @@
         const totalElement = document.getElementById('total');
 
         scoreElement.textContent = score;
-        totalElement.textContent = questions.length;
+        totalElement.textContent = filteredQuestions.length;
 
         resultsContainer.style.display = 'block';
         resultList.innerHTML = quizResponses.map((response, index) => `
@@ -230,10 +271,7 @@
         window.location.href = 'index.html';
     }
 
-    fetchQuestions().then(() => {
-        shuffleArray(questions);
-        displayQuestion();
-    });
+    fetchQuestions();
 </script>
 
 </body>
