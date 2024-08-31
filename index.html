@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCQ Quiz For MRCP</title>
+    <title>MCQ Question Bank FCPS/MRCP</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            font-size: 14px;
             line-height: 1.6;
             margin: 0;
             padding: 0;
@@ -72,7 +73,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
             margin-bottom: 10px;
             width: calc(50% - 10px);
             text-align: center;
@@ -102,7 +103,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s, transform 0.1s ease;
             font-size: 12px;
             text-align: left;
         }
@@ -127,7 +128,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
         }
         #show-answer:hover, #next-question:hover, #prev-question:hover {
             background-color: #2980b9;
@@ -162,7 +163,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
         }
         .sidebar-button:hover {
             background-color: #2980b9;
@@ -178,22 +179,22 @@
             height: 20px;
             background-color: #4caf50;
             border-radius: 5px;
-            transition: width 0.5s;
+            transition: width 0.5s ease;
         }
     </style>
 </head>
 <body>
-    <button class="sidebar-toggle">☰</button>
-    <div class="sidebar">
+    <button class="sidebar-toggle" aria-label="Toggle Sidebar">☰</button>
+    <div class="sidebar" role="navigation">
         <h2>MCQ Quiz</h2>
-        <div id="progress-bar">
+        <div id="progress-bar" aria-label="Progress Bar">
             <div id="progress"></div>
         </div>
     </div>
 
     <div class="container">
         <div class="content">
-            <h1>MCQ Quiz For MRCP</h1>
+            <h1>MCQ Question Bank FCPS/MRCP</h1>
             <div id="topic-selector">
                 <button class="topic-button" data-topic="cardiology">Cardiology</button>
                 <button class="topic-button" data-topic="endocrinology">Endocrinology</button>
@@ -232,10 +233,12 @@
         async function fetchQuestions() {
             try {
                 const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
                 questions = await response.json();
                 questions = questions.filter(q => q.question && q.option1 && q.option2 && q.option3 && q.option4 && q.option5 && q.correctAnswer);
             } catch (error) {
                 console.error('Error fetching questions:', error);
+                alert('Failed to load questions. Please check your connection and try again.');
             }
         }
 
@@ -271,7 +274,7 @@
             questionContainer.innerHTML = `
                 <h2>Question ${currentQuestionIndex + 1}: ${currentQuestion.question}</h2>
                 ${options.map((option, index) => `
-                    <button class="option" data-index="${index}">${option}</button>
+                    <button class="option" data-index="${index}" aria-label="Option ${index + 1}">${option}</button>
                 `).join('')}
             `;
 
@@ -314,7 +317,7 @@
             const explanationBox = document.getElementById('explanation-box');
             const explanationText = document.getElementById('explanation-text');
 
-            explanationText.textContent = currentQuestion.explanation;
+            explanationText.textContent = currentQuestion.explanation || 'No explanation available.';
             explanationBox.style.display = 'block';
         }
 
@@ -360,6 +363,7 @@
                 shuffleArray(questions);
                 currentQuestionIndex = 0;
                 displayQuestion();
+                saveProgress();
             });
         });
 
@@ -373,8 +377,30 @@
             window.location.href = 'quiz_exam.html';
         }
 
-        fetchQuestions().then(() => {
-            // Initially, no questions are shown until a topic is selected
+        function saveProgress() {
+            localStorage.setItem('quizProgress', JSON.stringify({
+                currentTopic,
+                currentQuestionIndex,
+                questions
+            }));
+        }
+
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('quizProgress');
+            if (savedProgress) {
+                const { currentTopic: savedTopic, currentQuestionIndex: savedIndex, questions: savedQuestions } = JSON.parse(savedProgress);
+                currentTopic = savedTopic;
+                currentQuestionIndex = savedIndex;
+                questions = savedQuestions;
+                displayQuestion();
+            }
+        }
+
+        window.addEventListener('load', () => {
+            loadProgress();
+            fetchQuestions().then(() => {
+                // Initially, no questions are shown until a topic is selected
+            });
         });
     </script>
 </body>
