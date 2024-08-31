@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            font-size: 14px;
             line-height: 1.6;
             margin: 0;
             padding: 0;
@@ -47,7 +47,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s, transform 0.1s ease;
             font-size: 12px;
             text-align: left;
         }
@@ -66,7 +66,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
         }
         #next-question:hover, #finish-quiz:hover, #home-page:hover {
             background-color: #2980b9;
@@ -128,10 +128,12 @@
     async function fetchQuestions() {
         try {
             const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Network response was not ok');
             questions = await response.json();
             questions = questions.filter(q => q.question && q.option1 && q.option2 && q.option3 && q.option4 && q.option5 && q.correctAnswer);
         } catch (error) {
             console.error('Error fetching questions:', error);
+            alert('Failed to load questions. Please check your connection and try again.');
         }
     }
 
@@ -165,7 +167,7 @@
         questionContainer.innerHTML = `
             <h2>Question ${currentQuestionIndex + 1}: ${currentQuestion.question}</h2>
             ${options.map((option, index) => `
-                <button class="option" data-index="${index}">${option}</button>
+                <button class="option" data-index="${index}" aria-label="Option ${index + 1}">${option}</button>
             `).join('')}
         `;
 
