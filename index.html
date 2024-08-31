@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -66,7 +66,7 @@
             justify-content: space-between;
             margin-bottom: 20px;
         }
-        .topic-button, #start-quiz {
+        .topic-button, #start-quiz, .add-question-button {
             padding: 8px 16px;
             background-color: #3498db;
             color: white;
@@ -78,11 +78,25 @@
             width: calc(50% - 10px);
             text-align: center;
         }
-        .topic-button:hover, #start-quiz:hover {
+        .topic-button:hover, #start-quiz:hover, .add-question-button:hover {
             background-color: #2980b9;
         }
         .topic-button.active {
             background-color: #2ecc71;
+        }
+        .home-button {
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .home-button:hover {
+            background-color: #2980b9;
         }
         #question-container {
             display: none;
@@ -181,12 +195,19 @@
             border-radius: 5px;
             transition: width 0.5s ease;
         }
+        #timer {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
     <button class="sidebar-toggle" aria-label="Toggle Sidebar">☰</button>
     <div class="sidebar" role="navigation">
         <h2>MCQ Quiz</h2>
+        <button class="home-button" onclick="location.href='index.html'">Home</button>
         <div id="progress-bar" aria-label="Progress Bar">
             <div id="progress"></div>
         </div>
@@ -203,6 +224,7 @@
             </div>
             <div id="quiz-exam-button-container">
                 <button id="start-quiz" onclick="startQuiz()">Start Quiz Exam</button>
+                <button class="add-question-button" onclick="location.href='add_question.html'">Add Your Question</button>
             </div>
             <div id="question-container"></div>
             <div id="explanation-box">
@@ -212,6 +234,7 @@
             <button id="prev-question" style="display: none;">Previous Question</button>
             <button id="show-answer" style="display: none;">Show Answer</button>
             <button id="next-question" style="display: none;">Next Question</button>
+            <div id="timer"></div>
         </div>
     </div>
 
@@ -220,6 +243,7 @@
         let questions = [];
         let currentQuestionIndex = 0;
         let currentTopic = '';
+        let timerInterval;
 
         const sidebarToggle = document.querySelector('.sidebar-toggle');
         const sidebar = document.querySelector('.sidebar');
@@ -263,18 +287,20 @@
 
             questionContainer.style.display = 'block';
             const options = [
-                currentQuestion.option1,
-                currentQuestion.option2,
-                currentQuestion.option3,
-                currentQuestion.option4,
-                currentQuestion.option5
+                { label: 'a', text: currentQuestion.option1 },
+                { label: 'b', text: currentQuestion.option2 },
+                { label: 'c', text: currentQuestion.option3 },
+                { label: 'd', text: currentQuestion.option4 },
+                { label: 'e', text: currentQuestion.option5 }
             ];
             shuffleArray(options);
 
             questionContainer.innerHTML = `
                 <h2>Question ${currentQuestionIndex + 1}: ${currentQuestion.question}</h2>
                 ${options.map((option, index) => `
-                    <button class="option" data-index="${index}" aria-label="Option ${index + 1}">${option}</button>
+                    <button class="option" data-index="${index}" aria-label="Option ${option.label}">
+                        ${option.label.toUpperCase()}. ${option.text}
+                    </button>
                 `).join('')}
             `;
 
@@ -298,12 +324,12 @@
 
             document.querySelectorAll('.option').forEach(option => {
                 option.disabled = true;
-                if (option.textContent === correctAnswerText) {
+                if (option.textContent.includes(correctAnswerText)) {
                     option.classList.add('correct');
                 }
             });
 
-            if (selectedOption.textContent !== correctAnswerText) {
+            if (!selectedOption.textContent.includes(correctAnswerText)) {
                 selectedOption.classList.add('incorrect');
             }
 
@@ -327,7 +353,7 @@
 
             document.querySelectorAll('.option').forEach(option => {
                 option.disabled = true;
-                if (option.textContent === correctAnswerText) {
+                if (option.textContent.includes(correctAnswerText)) {
                     option.classList.add('correct');
                 }
             });
@@ -396,12 +422,35 @@
             }
         }
 
+        function startTimer(duration, display) {
+            let timer = duration, minutes, seconds;
+            timerInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = `Time Left: ${minutes}:${seconds}`;
+
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up!');
+                    // Handle end of quiz logic here
+                }
+            }, 1000);
+        }
+
         window.addEventListener('load', () => {
             loadProgress();
             fetchQuestions().then(() => {
                 // Initially, no questions are shown until a topic is selected
             });
+
+            const timerDisplay = document.getElementById('timer');
+            startTimer(8 * 60, timerDisplay); // 8 minutes timer
         });
     </script>
 </body>
 </html>
+
