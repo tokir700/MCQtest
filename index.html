@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -221,6 +221,8 @@
                 <button class="topic-button" data-topic="endocrinology">Endocrinology</button>
                 <button class="topic-button" data-topic="respiratory">Respiratory</button>
                 <button class="topic-button" data-topic="gastroenterology">Gastroenterology</button>
+                <button class="topic-button" data-topic="infectious-disease">Infectious Disease</button>
+                <button class="topic-button" data-topic="rheumatology">Rheumatology</button>
             </div>
             <div id="quiz-exam-button-container">
                 <button id="start-quiz" onclick="startQuiz()">Start Quiz Exam</button>
@@ -244,6 +246,7 @@
         let currentQuestionIndex = 0;
         let currentTopic = '';
         let timerInterval;
+        let questionTimer;
 
         const sidebarToggle = document.querySelector('.sidebar-toggle');
         const sidebar = document.querySelector('.sidebar');
@@ -282,6 +285,7 @@
                 document.getElementById('show-answer').style.display = 'none';
                 document.getElementById('next-question').style.display = 'none';
                 document.getElementById('prev-question').style.display = 'none';
+                clearInterval(questionTimer);
                 return;
             }
 
@@ -297,8 +301,8 @@
 
             questionContainer.innerHTML = `
                 <h2>Question ${currentQuestionIndex + 1}: ${currentQuestion.question}</h2>
-                ${options.map((option, index) => `
-                    <button class="option" data-index="${index}" aria-label="Option ${option.label}">
+                ${options.map(option => `
+                    <button class="option" aria-label="Option ${option.label}">
                         ${option.label.toUpperCase()}. ${option.text}
                     </button>
                 `).join('')}
@@ -315,6 +319,7 @@
             });
 
             updateProgressBar();
+            startQuestionTimer();
         }
 
         function handleOptionClick(event) {
@@ -422,22 +427,19 @@
             }
         }
 
-        function startTimer(duration, display) {
-            let timer = duration, minutes, seconds;
-            timerInterval = setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+        function startQuestionTimer() {
+            clearInterval(questionTimer);
+            const timeLimit = 60; // 1 minute per question
+            let timer = timeLimit;
 
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-
-                display.textContent = `Time Left: ${minutes}:${seconds}`;
-
-                if (--timer < 0) {
-                    clearInterval(timerInterval);
-                    alert('Time is up!');
-                    // Handle end of quiz logic here
+            questionTimer = setInterval(() => {
+                if (timer <= 0) {
+                    clearInterval(questionTimer);
+                    alert('Time is up for this question!');
+                    // Handle end of question logic here (e.g., move to next question)
+                    document.getElementById('next-question').click();
                 }
+                timer--;
             }, 1000);
         }
 
@@ -446,11 +448,7 @@
             fetchQuestions().then(() => {
                 // Initially, no questions are shown until a topic is selected
             });
-
-            const timerDisplay = document.getElementById('timer');
-            startTimer(8 * 60, timerDisplay); // 8 minutes timer
         });
     </script>
 </body>
 </html>
-
